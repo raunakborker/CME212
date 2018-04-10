@@ -1,0 +1,18 @@
+cmake_minimum_required( VERSION 2.0 )
+
+project( moldyn )
+
+if ( NOT CMAKE_BUILD_TYPE )
+   message( STATUS "No build type selected, default to Release" )
+   set( CMAKE_BUILD_TYPE "Release" )
+endif( )
+
+add_compile_options( -std=c++11 -Wall -Wconversion -Wextra )
+
+# Enable testing
+enable_testing( )
+
+add_subdirectory( src )
+add_subdirectory( tests )
+
+file(COPY data DESTINATION ${moldyn_BINARY_DIR})

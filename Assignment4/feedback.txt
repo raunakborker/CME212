@@ -1,0 +1,35 @@
+src/tests/tests.cpp:5: -1functionality Missing includes: <cppunit/ui/text/TestRunner.h>, <cppunit/TestCaller.h>, <cppunit/extensions/HelperMacros.h>
+
+src/tests/tests.cpp:9: -1design No test suite, runner, etc. See Piazza post (@186)
+
+src/tests/tests.cpp:15: -style It would be better to initialize the pointer value with something at declaration time (use NULL if necessary)
+
+src/tests/tests.cpp:19: -functionality Better to use a larger test case.
+
+src/tests/tests.cpp:52: -design Potential for a memory leak here.  Note that if either SimpleTranspose or OptimizedTranspose fail, mat1 and mat2 will never get deallocated.
+
+src/exec/main1.cpp:4: -1style Unneeded include file(s): "config.h"
+
+src/utilities/transpose.cpp:19: -design Better to do this computation inline instead of creating a separate function for it.  Function calls have a small overhead and creating a separate function for just one line of code is probably overkill here.
+
+src/utilities/transpose.cpp:22: -design std::swap will do this in one line
+
+src/utilities/transpose.cpp:48: -design It is easier and cleaner to loop through the rows/columns directly, e.g., by i+=blocksize, j+=blocksize.   The indexing math is more straightforward.
+
+src/utilities/transpose.cpp:66: -design If you move the diagonal block computation/transpose above the inner for-loop, you can calculate row=ni*blocksize once and you won't need the row_lowerblock variable.
+
+src/utilities/transpose.cpp:85: -design Careful using the name "Swap" for a function, since "swap" is already used by the std library.
+
+src/utilities/initmatrix.cpp:9: +design Good validation of inputs
+
+src/utilities/initmatrix.cpp:23: -1design Would be better to initialize the padding values
+
+
+functionality: 59/60
+style: 9/10
+design: 18/20
+writeup: 10/10
+
+total: 96/100
+
+grader: Brian Jo (brianjo@stanford.edu)

@@ -1,0 +1,159 @@
+#ifndef IMAGE_HPP
+#define IMAGE_HPP
+
+#include <limits>
+#include <string>
+
+#include "imageio.hpp"
+#include "tiffio.h"
+
+namespace ImageAnalysis
+{
+  template <typename T>
+  class Image
+  {
+  private:
+      unsigned int width, height;
+      T *rgba;
+
+  public:
+    Image(std::string filename)
+    {
+      std::cout << "Image <unsigned char>" << std::endl;
+      ImageIO::Read8bitGrayscaleTIFF(filename,this->rgba,width,height);
+      // const char *inputfile = filename.c_str();
+      // T *rgbaT;      
+
+      // TIFF *tif = TIFFOpen(inputfile, "r");
+      // if (!tif)
+      // 	{
+      // 	  std::cerr << "ERROR: Failed to open " << filename << " for input" << std::endl;
+      // 	  //return 1;
+      // 	}
+      
+      // TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &this->width);
+      // TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &this->height);
+
+      // rgbaT = (T *) _TIFFmalloc(4*width*height*sizeof(T));
+      // TIFFReadRGBAImage(tif, this->width, this->height, (unsigned int *)rgbaT, 0);
+      
+      // this->rgba = new T[4*width*height];
+      // for(unsigned int n = 0; n < width*height; n++)
+      // 	{
+      // 	  this->rgba[4*n+0] = rgbaT[4*n+0];
+      // 	  this->rgba[4*n+1] = rgbaT[4*n+1];
+      // 	  this->rgba[4*n+2] = rgbaT[4*n+2];
+      // 	  this->rgba[4*n+3] = rgbaT[4*n+3];
+      // 	}
+
+      // _TIFFfree(rgbaT);
+      // rgbaT = NULL;
+
+      // TIFFClose(tif);
+      // tif = NULL; 
+    }
+    
+    Image(T *data, unsigned int width, unsigned int height)
+    {
+      std::cout << "Image <data>" << std::endl;
+
+      this->rgba = new T[width*height];
+      for(unsigned int n = 0; n < width*height; n++)
+	  this->rgba[n] = data[n];
+    }
+
+    void Save(std::string filename);
+
+    void Threshold(T threshold);
+
+    unsigned long int CountPixesGreaterThanOrEqual(T value = (T)0);
+
+    ~Image()
+    {
+      delete[] rgba;
+      rgba = NULL;
+    }
+  };
+  
+  template <>
+  Image<float>::Image(std::string filename)
+    {
+      std::cout << "Image <float>" << std::endl;
+
+      unsigned char *rgbachar = NULL;
+      ImageIO::Read8bitGrayscaleTIFF(filename,rgbachar,this->width,this->height);
+
+      this->rgba = new float[this->width*this->height];
+      for(unsigned int n = 0; n < width*height; n++)
+	{
+	  this->rgba[n] = (float)((float)rgbachar[n]/255.0f);
+	}
+      
+      delete[] rgbachar;
+      rgbachar = NULL;
+      
+      // const char *inputfile = filename.c_str();
+      // unsigned char *rgbachar;      
+
+      // TIFF *tif = TIFFOpen(inputfile, "r");
+      // if (!tif)
+      // 	{
+      // 	  std::cerr << "ERROR: Failed to open " << filename << " for input" << std::endl;
+      // 	  //return 1;
+      // 	}
+      
+      // TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &this->width);
+      // TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &this->height);
+
+      // rgbachar = (unsigned char *) _TIFFmalloc(4*width*height*sizeof(unsigned char));
+      // TIFFReadRGBAImage(tif, this->width, this->height, (unsigned int *)rgbachar, 0);
+
+      // this->rgba = new float[4*width*height];
+      // for(unsigned int n = 0; n < width*height; n++)
+      // 	{
+      // 	  this->rgba[4*n+0] = (float)((float)rgbachar[4*n+0]/255.0f);
+      // 	  this->rgba[4*n+1] = (float)((float)rgbachar[4*n+1]/255.0f);
+      // 	  this->rgba[4*n+2] = (float)((float)rgbachar[4*n+2]/255.0f);
+      // 	  this->rgba[4*n+3] = (float)((float)rgbachar[4*n+3]);
+      // 	}
+
+      // _TIFFfree(rgbachar);
+      // rgbachar = NULL;
+      
+      // TIFFClose(tif);
+      // tif = NULL; 
+    }
+
+  template <typename T>
+  void Image<T>::Save(std::string filename)
+  {
+    ImageIO::Write8bitGrayscaleTIFF(filename,this->rgba,width,height);
+  }
+  
+  template <>
+  void Image<float>::Save(std::string filename)
+  {
+    unsigned char *rgbachar = NULL;
+    unsigned char lim_min = std::numeric_limits<unsigned char>::min();
+    unsigned char lim_max = std::numeric_limits<unsigned char>::max();
+    
+    std::cout << "Save <float>" << std::endl;
+
+    rgbachar = new unsigned char[this->width*this->height];
+    for(unsigned int n = 0; n < width*height; n++)
+      {
+	float pix = this->rgba[n]*255.0f;
+	if (pix < lim_min)
+	  pix = lim_min;
+	else if (pix > lim_max)
+	  pix = lim_max;
+	rgbachar[n] = (unsigned char)(pix);
+      }
+    
+    ImageIO::Write8bitGrayscaleTIFF(filename,rgbachar,this->width,this->height);
+  }
+
+
+}
+
+#endif /* IMAGE_HPP */

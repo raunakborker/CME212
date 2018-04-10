@@ -1,0 +1,118 @@
+#ifndef PARTICLE_HPP
+#define PARTICLE_HPP
+
+#include <array>
+#include <iostream>
+
+#define DIM 3
+
+template<typename T>
+class ParticleBox;
+
+/* Class that defines a particle in a MD simulation */
+template <typename T>
+class Particle
+{
+private:
+  std::array<T,DIM> pos;
+  std::array<T,DIM> vel;
+  std::array<T,DIM> acc;
+  T mass;
+public:
+  template<typename U> friend class ParticleBox;
+  Particle(const std::array<T,DIM> &pos = std::array<T,DIM> {{0.0,0.0,0.0}}, 
+           const std::array<T,DIM> &vel = std::array<T,DIM> {{0.0,0.0,0.0}},
+           const std::array<T,DIM> &acc = std::array<T,DIM> {{0.0,0.0,0.0}},
+           T mass = 1.0);
+  void SetPos(const std::array<T,DIM> &R);
+  void SetVel(const std::array<T,DIM> &V);
+  void SetAcc(const std::array<T,DIM> &A);
+  void SetMass(T M);
+  std::array<T,DIM> GetPos(void);
+  std::array<T,DIM> GetVel(void);
+  std::array<T,DIM> GetAcc(void);
+  T GetMass(void);
+};
+
+template <typename T>
+Particle<T>::Particle(const std::array<T,DIM> &pos, 
+                      const std::array<T,DIM> &vel,
+                      const std::array<T,DIM> &acc,
+                      T mass)
+{
+  this->pos = pos;
+  this->vel = vel;
+  this->acc = acc;
+  this->mass = mass;
+}
+
+template <typename T>
+void Particle<T>::SetPos(const std::array<T,DIM> &R)
+{
+  if (R.size() == DIM)
+    for (unsigned int i=0; i<DIM; ++i)
+      this->pos[i] = R[i];
+  else
+    {  std::cerr << "Input position vector required to be of size " <<
+	DIM << ", provided vector is of size " << R.size() << std::endl;
+      exit(1);
+    }
+}
+
+template <typename T>
+void Particle<T>::SetVel(const std::array<T,DIM> &V)
+{
+  if (V.size() == DIM)
+    for (unsigned int i=0; i<DIM; ++i)
+      this->vel[i] = V[i];
+  else
+    {  std::cerr << "Input velocity vector required to be of size " <<
+	DIM << ", provided vector is of size " << V.size() << std::endl;
+      exit(1);
+    }
+}
+
+template <typename T>
+void Particle<T>::SetAcc(const std::array<T,DIM> &A)
+{
+  if (A.size() == DIM)
+    for (unsigned int i=0; i<DIM; ++i)
+      this->acc[i] = A[i];
+  else
+    {  std::cerr << "Input acceleration vector required to be of size " <<
+	DIM << ", provided vector is of size " << A.size() << std::endl;
+      exit(1);
+    }
+}
+
+template <typename T>
+void Particle<T>::SetMass(T M)
+{
+  this->mass = M;
+}
+
+template <typename T>
+std::array<T,DIM> Particle<T>::GetPos(void)
+{
+  return this->pos;
+}
+
+template <typename T>
+std::array<T,DIM> Particle<T>::GetVel(void)
+{
+  return this->vel;
+}
+
+template <typename T>
+std::array<T,DIM> Particle<T>::GetAcc(void)
+{
+  return this->acc;
+}
+
+template <typename T>
+T Particle<T>::GetMass(void)
+{
+  return this->mass;
+}
+
+#endif /* PARTICLE_HPP */

@@ -1,0 +1,30 @@
+#include <cstddef>
+#include <iostream>
+
+#include "utilities.hpp"
+
+// Initializes a matrix to 
+int InitMatrix(double *a, int size, int ldim)
+{
+  if (a == NULL)
+    {
+      std::cerr << "a is NULL" << std::endl;
+      return 1;
+    }
+  else if (ldim < size)
+    {
+      std::cerr << "ldim < size" << std::endl;
+      return 2;
+    }
+  
+  for (int i=0; i<size; i++) 
+    {
+      for (int j=0; j<size; j++)
+        {
+          int indij = i*ldim + j;
+          a[indij] = (double)indij;
+        }
+    }
+
+  return 0;
+}

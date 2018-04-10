@@ -1,0 +1,20 @@
+CXX=g++
+CXXFLAGS=-g -O3 -Wall -Wextra -Wconversion -std=c++11
+LDFLAGS=-lcppunit
+
+INCS = ParticleBox.hpp Particle.hpp auxfuncs.hpp macros.hpp
+PATHS = -I include/
+SRC_EXEC = src/exec
+SRC_TEST = src/tests
+
+main: $(SRC_EXEC)/main.cpp
+	$(CXX) $(CXXFLAGS) -o main $(SRC_EXEC)/main.cpp $(PATHS)
+	./main 10 -o "sol10.dat"
+	./main 10 -i "sol10.dat" -o "sol20.dat"
+
+check: $(SRC_TEST)/tests.cpp
+	$(CXX) $(CXXFLAGS) -o tests $(SRC_TEST)/tests.cpp $(PATHS) $(LDFLAGS)
+	./tests
+
+clean:
+	rm -f $(OBJS) $(TARGET) *~

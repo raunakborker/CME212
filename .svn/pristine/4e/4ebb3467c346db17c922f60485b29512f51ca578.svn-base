@@ -1,0 +1,63 @@
+#include <cstddef>
+
+#include <cppunit/TestCase.h>
+
+#include "utilities.hpp"
+
+class TransposeTest: public CppUnit::TestCase
+{
+private:
+  double *mat1;
+  double *mat2;
+  int size = 4;
+  int ldim = size + 2;
+  
+  // Method to compare two matrices element-wise
+  bool TestEquality(double *mat1, double *mat2, int size, int ldim)
+  {
+    for (int i=0; i<size; i++)
+      {
+	for (int j=0; j<size; j++)
+	  {
+	    int index = j + i*ldim;
+
+	    if (mat1[index] != mat2[index])
+	      return false;
+	  }
+      }
+    return true;
+  }
+
+public:
+  TransposeTest() : CppUnit::TestCase("Tranpose Test") {}
+
+  void runTest()
+  {
+    mat1 = new double[size*ldim];
+    InitMatrix(mat1, size, ldim);
+                                                                                                
+    mat2 = new double[size*ldim];
+    InitMatrix(mat2, size, ldim);
+    
+    bool flag = false;
+    if (!SimpleTranspose(mat1, size, ldim))
+      {	
+	if (!OptimizedTranspose(mat2, size, ldim, 2))
+	  {
+	    flag = TestEquality(mat1,mat2,size,ldim);
+	    delete [] mat1; mat1 = NULL;
+	    delete [] mat2; mat2 = NULL;    
+	  }  
+      }
+    CPPUNIT_ASSERT(flag);
+  }
+
+};
+
+int main() 
+{
+  TransposeTest t;
+  t.runTest();
+
+  return 0; 
+}

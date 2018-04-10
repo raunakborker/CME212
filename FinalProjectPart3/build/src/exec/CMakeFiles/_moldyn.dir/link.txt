@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC -O3 -DNDEBUG   -shared -Wl,-soname,_moldyn.so -o _moldyn.so CMakeFiles/_moldyn.dir/moldynPYTHON_wrap.o CMakeFiles/_moldyn.dir/swap.o -lpython2.7 

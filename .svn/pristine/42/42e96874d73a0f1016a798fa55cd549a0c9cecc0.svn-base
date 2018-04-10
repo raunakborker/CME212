@@ -1,0 +1,93 @@
+#include <cstddef>
+
+#include "utilities.hpp"
+
+// Performs inplace matrix tranpose
+int SimpleTranspose(double *a, int size, int ldim)
+{
+  if (a == NULL || ldim < size)
+    {
+      return 1;
+    }
+
+  // Loop over elements below the diagonal
+  // starts from i=1 since i=0,j=0 is on the diagonal
+  for (int i=1; i<size; i++)
+    {
+      for (int j=0; j<i; j++)
+        {
+          int indij = GlobalIndex(i, j, ldim);
+          int indji = GlobalIndex(j, i, ldim);
+          double aij = a[indij];
+          a[indij] = a[indji];
+          a[indji] = aij;
+        }
+    }
+
+  return 0;
+}
+
+// Performs inplace matrix tranpose using blocks
+int OptimizedTranspose(double *a, int size, int ldim, int blocksize)
+{
+  if (a == NULL || ldim < size)
+    {
+      return 1;
+    }
+
+  if (size % blocksize != 0)
+    {
+      return 2;
+    }
+  
+  int nblock = size/blocksize;
+  
+  // Loop over blocks below the diagonal
+  for (int ni=0; ni<nblock; ni++)
+    {
+      for (int nj=0; nj<ni; nj++)
+	{
+	  int row_lowerblock = ni*blocksize;
+	  int col_lowerblock = nj*blocksize;
+
+	  int ind_lowerblock = GlobalIndex(row_lowerblock, col_lowerblock,ldim);
+	  int ind_upperblock = GlobalIndex(col_lowerblock, row_lowerblock,ldim);
+
+	  SimpleTranspose(a + ind_lowerblock, blocksize, ldim);
+	  SimpleTranspose(a + ind_upperblock, blocksize, ldim);
+
+	  Swap(a + ind_lowerblock, a + ind_upperblock, blocksize, ldim);	
+	}
+
+      // Diagonal block
+      int row = ni*blocksize;
+      int col = ni*blocksize;
+      int ind = GlobalIndex(row, col, ldim);
+
+      SimpleTranspose(a + ind, blocksize, ldim);
+    }
+
+  return 0;
+}
+
+// Helper function converts 2D index (rowid,colid) to 1D
+int GlobalIndex(int rowid, int colid, int ldim)
+{
+  return colid + rowid*ldim;
+}
+
+// Swaps elements of matrices a and b
+void Swap(double *a, double *b, int size, int ldim)
+{
+  // Loop over matrix elements
+  for (int i=0; i<size; i++)
+    {
+      for (int j=0; j<size; j++)
+	{
+	  int indij = GlobalIndex(i, j, ldim);
+	  double aij = a[indij];
+	  a[indij] = b[indij];
+	  b[indij] = aij;
+	}
+    }
+}

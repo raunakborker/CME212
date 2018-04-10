@@ -1,0 +1,38 @@
+#include <array>
+#include <iostream>
+
+#include "config.h"
+
+#include "part.hpp"
+#include "shapes.hpp"
+
+int main()
+{
+  Sphere s1(0,0,0,1);
+  RightCircularCone s2(1,0,0,0,0,0,1);
+  
+  // std::array<double,3> point{{0.5,0.5,0.5}};
+  std::array<double,3> point;
+  point[0] = 0.5; point[1] = 0.5; point[2] = 0.5;
+  std::cout << s1.PointInside(point) << std::endl;
+  
+  std::array<double,3> point2{{0.5,0,0.5}};
+  std::cout << s2.PointInside(point2) << std::endl;
+  
+  // auto box1 = s1.BoundingBox();
+  // std::cout << box1[0] << " " << box1[1] << " " << box1[2] << " " << box1[3] << std::endl;
+  
+  // auto box2 = s2.BoundingBox();
+  // std::cout << box2[0] << " " << box2[1] << " " << box2[2] << " " << box2[3] << std::endl;
+  
+  Part p;
+  p.ReadPartFile("tmp.txt");
+  std::array<double,3> point3{{0.5,0.,0.}};
+  std::array<double,3> normal{{1.,0.,0.}};
+  std::array<double,3> dx{{0.5,0.5,0.5}};
+  auto vol = p.SliceVolume(normal, point3, dx); 
+  
+  for(auto &data : vol) {
+    std::cout << data.first << " " << data.second << std::endl;
+  }  
+}

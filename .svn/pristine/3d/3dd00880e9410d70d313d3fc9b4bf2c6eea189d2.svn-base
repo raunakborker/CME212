@@ -1,0 +1,29 @@
+include/solverbicgstab.hpp:69: -1functionality Should check that matrix A is square.
+
+include/solverbicgstab.hpp:83: -design At least you didn't make the very common mistake of assuming x is empty.  However, it would be much easier to just set x=std::vector(ncols,0) or x.assign(ncols,0).
+
+include/solverbicgstab.hpp:112: -2functionality Need to confirm that (rhat,r) is not approximately 0
+
+include/solverbicgstab.hpp:121: -style n++ is fine here, you don't have to match the pseudocode exactly.
+
+include/solverbicgstab.hpp:139: -design Overloading operator+= and doing x += ... would have been fine too, no need to follow pseudocode exactly.
+
+include/solverbicgstab.hpp:155: -1functionality Set niter and elapsed time if the solution doesn’t converge.
+
+include/solveroperators.hpp:4: +style Nice job including the necessary libraries for this file.
+
+include/solveroperators.hpp:11: +design Good use of std library algorithms to make your operators efficient and concise
+
+include/solveroperators.hpp:85: -design Look at std::inner_product for a one-line way to do this, or see solution
+
+include/solveroperators.hpp:101: -design Make sure you call the C++ version std::sqrt instead of the C version sqrt.  Then you wouldn't need an explicit cast.
+
+
+functionality: 46/50
+style: 15/15
+design: 30/30
+writeup: 5/5
+
+total: 96/100
+
+grader: Brian Jo (brianjo@stanford.edu)

@@ -1,0 +1,10 @@
+main.cpp:5: +functionality Checkpoint / restart demonstration shows consistent results
+
+main.cpp:6: +functionality Tests compile and pass
+
+
+functionality: 10/10
+
+total: 10/10
+
+grader: Brian Jo (brianjo@stanford.edu)

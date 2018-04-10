@@ -1,0 +1,59 @@
+#include <iostream>
+#include <string>
+
+#include "imageio.hpp"
+#include "tiffio.h"
+
+namespace ImageIO
+{
+  void Read8bitGrayscaleTIFF(std::string filename, 
+			     unsigned char * &data,
+			     unsigned int &width, 
+			     unsigned int &height)
+  {
+    TIFF *tif = TIFFOpen(filename, "r");
+    if (!tif)
+      {
+	std::cerr << "ERROR: Failed to open " << filename << " for input" << std::endl;
+	return 1;
+      }
+
+    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
+
+    rgba = (unsigned char *) _TIFFmalloc(4*width*height*sizeof(unsigned char));
+    TIFFReadRGBAImage(tif, width, height, (unsigned int *)rgba, 0);
+
+    data = new unsigned char[width*height];
+    for(n = 0; n < width*height; n++)
+      {
+	/* Average the sum of the R, G, and B channels. */
+	data[n] = (unsigned char)(((unsigned int)rgba[4*n+0] +
+					(unsigned int)rgba[4*n+1] +
+					(unsigned int)rgba[4*n+2])/3);
+      }
+    _TIFFfree(rgba);
+    rgba = NULL;
+    
+    TIFFClose(tif);
+    tif = NULL; 
+  }
+  
+  void Write8bitGrayscaleTIFF(std::string filename, 
+			      unsigned char *data,
+			      unsigned int width, 
+			      unsigned int height)
+  {
+  }
+}
+
+#ifdef DEBUG
+int main()
+{
+  unsigned int width, height;
+  unsigned char *data;
+  std::string *inputfile = "cy3.tiff";
+
+  ImageIO::Read8bitGrayscaleTIFF(inputfile,data,width,height);
+}
+#endif 

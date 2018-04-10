@@ -1,0 +1,8 @@
+mass: 48.
+nparticles: 64
+boxsize: 4.2323167
+temp0: 0.728
+stepsize: 0.01
+nsteps: 50
+input: 
+savefreq: 10

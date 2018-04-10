@@ -1,0 +1,31 @@
+#include "../../include/utilities.hpp"
+
+int SimpleTranspose(double *a, int size, int ldim)
+{
+  
+  if (a=NULL || ldim < size)
+    {
+      return 1;
+    }
+
+  // row wise storage (0 based indexing)
+  for (int i=0; i<size; i++) //can start from i=1
+    {
+      for (int j=0; j<i; j++)
+        {
+          int indij = GlobalIndex(i,j,ldim);
+          int indji = GlobalIndex(j,i,ldim);
+
+          double tmp = a[indij];
+          a[indij] = a[indji];
+          a[indji] = tmp;
+        }
+    }
+  
+  return 0;
+}
+
+int GlobalIndex(int rowid, int colid, int ldim)
+{
+  return colid + rowid*ldim;
+}

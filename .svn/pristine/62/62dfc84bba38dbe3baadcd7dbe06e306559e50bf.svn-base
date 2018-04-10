@@ -1,0 +1,23 @@
+CXX=g++
+
+CXXFLAGS=-O3 -Wall -Wextra -Wconversion -std=c++11
+
+TARGET = main
+OBJS = main.o
+INCS = ParticleBox.hpp Particle.hpp macros.hpp auxfuncs.hpp
+
+main: $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+
+%.o: %.cpp $(INCS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+
+clean:
+	rm -f $(OBJS) $(TARGET) *~
+
+all: run
+
+run: $(TARGET)
+	./$(TARGET)
+
+.PHONY: all run

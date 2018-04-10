@@ -1,0 +1,173 @@
+#ifndef solveroperators_hpp
+#define solveroperators_hpp
+
+#include <algorithm>
+#include <vector>
+
+#include "macros.hpp"
+
+template <typename T>
+std::vector<T> operator- (const std::vector<T> &a, 
+			  const std::vector<T> &b)
+{
+  //std::cout << "Add" << std::endl;
+  std::vector<T> sum(a);
+
+  //  std::copy ( a.begin(), a.end(), sum.begin() );
+  //std::cout << "Copy" << std::endl;
+  
+  // Check if vectors are of the same size
+  if (a.size()==b.size())
+    {
+      //for (unsigned int i=0; i<a.size(); i++)
+      //  sum.push_back(a[i]+b[i]);
+      std::transform (sum.begin(), sum.end(), b.begin(), sum.begin(), std::minus<T>());
+
+      return sum;
+    }
+  else
+    {
+      ThrowException("Vectors of different lengths");
+    }
+}
+
+template <typename T>
+std::vector<T> operator+ (const std::vector<T> &a, 
+			  const std::vector<T> &b)
+{
+  //std::cout << "Add" << std::endl;
+  std::vector<T> sum(a);
+
+  //  std::copy ( a.begin(), a.end(), sum.begin() );
+  //std::cout << "Copy" << std::endl;
+  
+  // Check if vectors are of the same size
+  if (a.size()==b.size())
+    {
+      //for (unsigned int i=0; i<a.size(); i++)
+      //  sum.push_back(a[i]+b[i]);
+      std::transform (sum.begin(), sum.end(), b.begin(), sum.begin(), std::plus<T>());
+
+      return sum;
+    }
+  else
+    {
+      ThrowException("Vectors of different lengths");
+    }
+}
+
+// template <typename T>
+// std::vector<T> Add(const std::vector<T> &a, 
+//                    const std::vector<T> &b)
+// {
+//   //std::cout << "Add" << std::endl;
+//   std::vector<T> sum(a);
+
+//   //  std::copy ( a.begin(), a.end(), sum.begin() );
+//   //std::cout << "Copy" << std::endl;
+  
+//   // Check if vectors are of the same size
+//   if (a.size()==b.size())
+//     {
+//       //for (unsigned int i=0; i<a.size(); i++)
+//       //  sum.push_back(a[i]+b[i]);
+//       std::transform (sum.begin(), sum.end(), b.begin(), sum.begin(), std::plus<T>());
+
+//       return sum;
+//     }
+//   else
+//     {
+//       ThrowException("Vectors of different lengths");
+//     }
+// }
+
+// /* Product of a scalar and vector */
+// template <typename T>
+// std::vector<T> Prod(const T a, const std::vector<T> &b)
+// {
+//   //std::cout << "ProdSca" << std::endl;
+//   std::vector<T> prod (b.size(),0.0);
+  
+//   //for (unsigned int i=0; i<b.size(); i++)
+//   //    prod[i] = a*b[i];
+//   std::transform(b.begin(), b.end(), prod.begin(),
+// 		 std::bind1st(std::multiplies<T>(),a));
+//   return prod;
+// }
+
+/* Product of a scalar and vector */
+template <typename T>
+std::vector<T> operator* (const T a, const std::vector<T> &b)
+{
+  //std::cout << "ProdSca" << std::endl;
+  std::vector<T> prod (b.size(),0.0);
+  
+  //for (unsigned int i=0; i<b.size(); i++)
+  //    prod[i] = a*b[i];
+  std::transform(b.begin(), b.end(), prod.begin(),
+		 std::bind1st(std::multiplies<T>(),a));
+  return prod;
+}
+
+template <typename T>
+std::vector<T> operator* (const std::vector<T> &b, const T a)
+{
+  //std::cout << "ProdSca" << std::endl;
+  std::vector<T> prod (b.size(),0.0);
+  
+  //for (unsigned int i=0; i<b.size(); i++)
+  //    prod[i] = a*b[i];
+  std::transform(b.begin(), b.end(), prod.begin(),
+		 std::bind1st(std::multiplies<T>(),a));
+  return prod;
+}
+
+// /* Dot product of 2 vectors */
+// template <typename T>
+// T Prod(const std::vector<T> &a, 
+//        const std::vector<T> &b)
+// {
+//   //std::cout << "ProdVec" << std::endl;
+//   T val = 0.0;
+  
+//   // Check if vectors are of the same size
+//   if (a.size()==b.size())
+//     {
+//       for (unsigned int i=0; i<a.size(); i++)
+//         val += a[i]*b[i];
+//       //val = std::inner_product(a.begin(),a.end(),b.begin(),val);
+
+//       return val;
+//      }
+//   else
+//     {
+//       ThrowException("Vectors of different lengths")
+//     } 
+// }
+
+/* Dot product of 2 vectors */
+template <typename T>
+T operator* (const std::vector<T> &a, 
+	     const std::vector<T> &b)
+{
+  //std::cout << "ProdVec" << std::endl;
+  T val = 0.0;
+  
+  // Check if vectors are of the same size
+  if (a.size()==b.size())
+    {
+      for (unsigned int i=0; i<a.size(); i++)
+        val += a[i]*b[i];
+      //val = std::inner_product(a.begin(),a.end(),b.begin(),val);
+
+      return val;
+     }
+  else
+    {
+      ThrowException("Vectors of different lengths")
+    } 
+}
+
+
+
+#endif /* solveroperators_hpp */

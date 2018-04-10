@@ -1,0 +1,72 @@
+#include <array>
+#include <iomanip>
+#include <iostream>
+#include <string>
+
+#include "config.h"
+
+#include "part.hpp"
+#include "shapes.hpp"
+
+int main(int argc, char *argv[])
+{
+
+  /* Get command line arguments */
+  if (argc != 4)
+    {
+      std::cout << "Usage:" << std::endl;
+      std::cout << "  " << argv[0] << "<part file> <axis = x, y, or z> <distance along axis> " << std::endl;
+      return 0;
+    }
+
+  std::string partfile = argv[1];
+  std::string axis = argv[2];
+  double coordinate = std::stof(argv[3]);
+
+  std::array<double,3> normal{{0.,0.,0.}};
+  std::array<double,3> point3{{0.,0.,0.}};  
+  std::array<double,3> dx{{0.5,0.5,0.5}};
+
+  if (axis == "x")
+    {
+      point3[0] = coordinate;
+      normal[0] = 1.0;
+    }
+  else if (axis == "y")
+    {
+      point3[1] = coordinate;
+      normal[1] = 1.0;
+    }
+  else if (axis == "z")
+    {
+      point3[2] = coordinate;
+      normal[2] = 1.0;
+    }
+  else
+    {
+      std::cerr << "ERROR: unknown axis '" << axis << "' " << std::endl;
+      exit(1);
+    }
+
+  Part p;
+  p.ReadPartFile(partfile);
+
+  std::cout << "Loaded part file from file " << partfile << \
+    " with a total of " << p.GetnShapes() << " shapes and " << p.GetnColor() << " colors " << std::endl;
+
+  auto vol = p.SliceVolume(normal, point3, dx); 
+
+  std::cout << "Material volume requirements for slice through x = " <<\
+    argv[3] << ":" << std::endl;
+  std::cout << "color       volume" << std::endl;
+
+  std::cout.setf(std::ios::fixed, std::ios::floatfield);
+  std::cout.setf(std::ios::showpoint);
+  std::cout.precision(3);
+
+  for(auto &data : vol) {
+    std::cout << std::setw(5) << data.first;
+    std::cout << "       ";
+    std::cout << std::setw(6) << data.second << std::endl;
+  }  
+}

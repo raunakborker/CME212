@@ -1,0 +1,52 @@
+#include <iostream>
+#include <new>
+
+#include "config.h"
+
+#include "timer.h"
+#include "utilities.hpp"
+
+int main()
+{
+  int size = 4096;
+  int ldim = size + 32;
+
+  // Initialize matrix of size 4096 X 4096
+  double *mat = new double [ldim*size];
+  InitMatrix(mat,size,ldim);
+
+  std::cout << "Running OptimizedTranspose():" << std::endl;
+  double t_start = timer();
+  auto out = OptimizedTranspose(mat,size,ldim,128);
+  double t_end = timer();
+  
+  double bandwidth = 2*size*size*(double)sizeof(double)/1.e9/(t_end-t_start);
+  std::cout << "Effective bandwidth = " << bandwidth << " GB/sec" << std::endl;
+
+  if (out != 0)
+    {
+      return out;
+    }
+  else
+    {
+      for (int i=0; i<size; i++) //can start from i=1
+        {
+          for (int j=0; j<size; j++)
+            {
+              int indij = GlobalIndex(i,j,ldim);
+              //std::cout << "(" << i << "," << j << "): " << mat[indij] << std::endl;
+	      if (mat[indij] != GlobalIndex(j,i,ldim))
+		{
+		  std::cerr << "Matrix transpose not succesful!" << std::endl;
+		  exit(3);
+		  }
+            }
+        } 
+    }
+  
+
+  delete [] mat; 
+  mat = NULL;
+  
+  return 0;
+}

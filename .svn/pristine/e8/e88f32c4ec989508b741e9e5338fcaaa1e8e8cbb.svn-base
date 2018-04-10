@@ -1,0 +1,387 @@
+#ifndef PARTICLEBOX_HPP
+#define PARTICLEBOX_HPP
+
+#include <array>
+#include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <string>
+#include <vector>
+
+#include "auxfuncs.hpp"
+#include "macros.hpp"
+#include "Particle.hpp"
+
+#define DIM 3
+#define PREC 16
+
+/* Class that has a N particles in a box */
+template <typename T>
+class ParticleBox
+{
+private:
+  std::vector<Particle<T> > particles;
+  T h, L, T0;
+  unsigned int N;
+
+  T Distance(const std::array<T,DIM> &posi, 
+	     const std::array<T,DIM> &posj);
+  T Potential(T r);
+  void Displacement(const std::array<T,DIM> &posi, 
+		    const std::array<T,DIM> &posj, 
+		    std::array<T,DIM> &d);
+  void GetForce(const std::array<T,DIM> &posi, 
+		const std::array<T,DIM> &posj, 
+		std::array<T,DIM> &F);
+  void InitPosition(T M);
+  void InitVelocity(T M);
+  void PutInBox(std::array<T,DIM> &posi);
+  void SetPos(const std::vector<std::array<T,DIM> > &pos);
+  void SetVel(const std::vector<std::array<T,DIM> > &vel);
+  std::array<T,DIM> InternalForce(unsigned int ind);
+  std::array<T,DIM> VerletNextR(unsigned int ind);
+  std::array<T,DIM> VerletNextV(unsigned int ind, 
+				const std::array<T,DIM> &nacc);
+
+public:
+  ParticleBox(unsigned int N, T L, T T0, T M = (T)1.0);
+  ParticleBox(std::string checkpointfile);
+  void ComputeEnergy(std::array<T,DIM> &energy);
+  void Solve(unsigned int steps=25);
+  void WriteData(std::string outputfile);
+};
+
+template <typename T>
+ParticleBox<T>::ParticleBox(unsigned int N, T L, T T0, T M)
+{
+  this->N = N;
+  this->L = L;
+  this->T0 = T0;
+  this->h = (T)0.01;
+  
+  particles = std::vector< Particle<T> > (N,Particle<T>());
+
+  InitPosition(M);
+  InitVelocity(M);
+}
+
+template <typename T>
+ParticleBox<T>::ParticleBox(std::string checkpointfile)
+{
+  std::ifstream fcheckpoint;
+  fcheckpoint.open(checkpointfile);
+
+  if (fcheckpoint.is_open())
+    { 
+      double M;
+      fcheckpoint >> this->N >> this->L >> this->T0 >> this->h >> M;
+      
+      particles = std::vector< Particle<T> > (N,Particle<T>());
+
+      std::array<T,DIM> pos{{0.0, 0.0, 0.0}};
+      std::array<T,DIM> vel{{0.0, 0.0, 0.0}};
+      
+      for (unsigned int n=0; n<N; n++)
+        {
+          fcheckpoint >> pos[0] >> pos[1] >> pos[2] >> vel[0] >> vel[1] >> vel[2];
+	  particles[n].SetMass(M);
+	  particles[n].SetPos(pos);
+	  particles[n].SetVel(vel);
+        }
+      fcheckpoint.close();
+     }
+  else
+    {
+      ThrowException("ERROR: Failed to open the file " + checkpointfile + " !");
+    }
+}
+
+// Initialize position of all the particles
+template <typename T>
+void ParticleBox<T>::InitPosition(T M)
+{
+  unsigned int Ncube = 1;
+
+  while (N > (Ncube*Ncube*Ncube))
+    Ncube++;
+
+  if ((T)std::pow(Ncube,3) != N)
+    {
+      std::cout << "Particle number " << N << " is not a perfect cube;" 
+                << " this may result in a lousy initialization" << std::endl;
+    }
+
+  T rs = (T)L/Ncube;
+  T roffset = (T)L/2 - rs/2;
+  unsigned int n = 0;
+  
+  for (unsigned int x=0; x<Ncube; x++)
+    {
+      for (unsigned int y=0; y<Ncube; y++)
+        {
+          for (unsigned int z=0; z<Ncube; z++)
+            {
+              if (n < N)
+                {
+                  std::array<T,DIM> pos{{rs*x - roffset,  rs*y - roffset, rs*z - roffset}};
+		  particles[n].SetMass(M);
+		  particles[n].SetPos(pos);
+                  n++;
+                }
+            }
+        }
+    }
+}
+
+// Initialize velocity of all the particles
+template <typename T>
+void ParticleBox<T>::InitVelocity(T M)
+{
+  T netE = 0.0;
+  T newP = 0.0;
+  T vscale = 0.0;
+  std::array<T,DIM> netP{{0.0, 0.0, 0.0}};
+
+  std::default_random_engine generator;
+  std::uniform_real_distribution<T> distribution(0.0,1.0);
+
+  for (unsigned int n=0; n<N; n++)
+    {
+      std::array<T,DIM> vel{{0.0,0.0,0.0}};
+      for (unsigned int x=0; x<DIM; x++)
+	{
+	  newP = distribution(generator) - (T)0.5;
+	  netP[x] += newP;
+	  netE += newP*newP;
+	  vel[x]= newP;
+	}
+      particles[n].SetVel(vel);
+    }
+
+  netP = ((T)1.0/N)*netP;
+  vscale = std::sqrt(3*N*T0/(M*netE));
+  for (unsigned int n=0; n<N; n++)
+    {
+      auto &vel = particles[n].vel;
+      for (unsigned int x=0; x<DIM; x++)
+        {
+          vel[x] = (vel[x] - netP[x]) * vscale;
+        }
+      particles[n].SetVel(vel);
+    }
+}
+
+template <typename T>
+void ParticleBox<T>::ComputeEnergy(std::array<T,DIM> &energy)
+{
+  for (unsigned int i=0; i < energy.size(); i++)
+      energy[i] = 0.0;
+
+  for (unsigned int i=0; i<N; i++)
+    {
+      auto &mass = particles[i].mass;
+      auto &posi = particles[i].pos;
+      auto &vel = particles[i].vel;
+
+      // Kinetic Energy
+      for (unsigned int k=0; k<DIM; k++)
+        energy[1] += (T)0.5*mass*(vel[k]*vel[k]);
+
+      // Potential Energy 
+      for (unsigned int j=0; j<i; j++)
+        {
+	  auto &posj = particles[j].pos;
+	  auto d = Distance(posi,posj);
+	  energy[0] += Potential(d);
+        }
+    }
+  // Total Energy
+  energy[2] = energy[0] + energy[1];
+}
+
+template <typename T>
+std::array<T,DIM> ParticleBox<T>::InternalForce(unsigned int ind)
+{
+  std::array<T,DIM> dF{{0.0,0.0,0.0}};
+  std::array<T,DIM> F{{0.0,0.0,0.0}};
+
+  auto &Ri = particles[ind].pos;
+  for (unsigned int j=0; j<N; j++)
+    {
+      if (j != ind)
+        {
+          auto &Rj = particles[j].pos;
+ 	  GetForce(Ri,Rj,dF);
+	  
+	  F += dF;	  
+        }
+    }
+  return F;
+}
+
+template <typename T>
+void ParticleBox<T>::Solve(unsigned int steps)
+{
+  std::array<T,DIM> computedE{{0.0, 0.0, 0.0}};
+  std::array<T,DIM> force{{0.0, 0.0, 0.0}};
+  std::array<T,DIM> nforce{{0.0, 0.0, 0.0}};
+  
+  ComputeEnergy(computedE);
+  std::cout << 0 << " " << std::setprecision( 12 ) << computedE << std::endl;
+  
+  for (unsigned int t=0; t<steps; t++)
+    {
+      std::vector<std::array<T,DIM> > npos, nvel;
+
+      for (unsigned int n=0; n<N; n++)
+        {
+	  auto &mass = particles[n].mass;	  
+	  force = InternalForce(n);	  
+	  auto acc = (1/mass)*force;
+          particles[n].SetAcc(acc);
+
+          npos.push_back(VerletNextR(n));
+        }
+      SetPos(npos);
+      
+      for (unsigned int n=0; n<N; n++)
+        {
+          auto &mass = particles[n].mass;
+	  nforce = InternalForce(n);
+	  auto nacc = (1/mass)*nforce;
+          
+          nvel.push_back(VerletNextV(n,nacc));          
+        }
+      SetVel(nvel);
+
+      ComputeEnergy(computedE);
+      std::cout << t+1 << " " << std::setprecision( 12 ) << computedE << std::endl;
+    }
+}
+
+template <typename T>
+void ParticleBox<T>::WriteData(std::string outputfile)
+{  
+  std::ofstream fout;  
+  fout.open(outputfile);
+  fout.precision(PREC);
+  if (fout.is_open())
+    { 
+      double &M = particles[0].mass;
+      fout << N << " " << L << " " << T0 << " " << h << " " << M << "\n";
+
+      for (unsigned int n=0; n < this->N; n++)
+        {
+	  auto &pos = particles[n].pos;
+          auto &vel = particles[n].vel;
+          fout << pos << " " << vel << "\n";
+        }
+      fout.close();
+      std::cout << "Solution saved to: " << outputfile << std::endl;
+    }
+  else
+    {
+      ThrowException("ERROR: Failed to open the file !");
+    }
+}
+
+template <typename T>
+void ParticleBox<T>::GetForce(const std::array<T,DIM> &posi, 
+			      const std::array<T,DIM> &posj, 
+			      std::array<T,DIM> &F)
+{
+  T r = Distance(posi,posj);
+  T r2 = r*r;
+  T r2i = 1/r2;
+  T r6i = (T)std::pow(r2i,3);
+
+  Displacement(posi,posj,F);
+
+  for (unsigned int i=0; i<DIM; i++)
+    {
+      F[i] = 24*r6i*r2i*(2*r6i-1)*F[i];
+    }
+}
+
+template <typename T>
+void ParticleBox<T>::Displacement(const std::array<T,DIM> &posi, 
+				  const std::array<T,DIM> &posj, 
+				  std::array<T,DIM> &d)
+{
+  d = posi-posj;
+  PutInBox(d);
+}
+
+template <typename T>
+T ParticleBox<T>::Distance(const std::array<T,DIM> &posi,
+			   const std::array<T,DIM> &posj)
+{
+  std::array<T,DIM> d{{0.0,0.0,0.0}};
+  Displacement(posi,posj,d);
+
+  return L2norm(d);
+}
+
+template <typename T>
+T ParticleBox<T>::Potential(T r)
+{
+  T r6 = (T)std::pow(r,6);
+  T r12 = (T)std::pow(r6,2);
+  
+  return 4*(1/r12 - 1/r6);
+}
+
+template <typename T>
+void ParticleBox<T>::PutInBox(std::array<T,DIM> &pos)
+{
+  for (unsigned int i=0; i<DIM; i++)
+    {
+      pos[i] = (pos[i] - std::nearbyint(pos[i]/L)*L);
+    }
+}
+
+template <typename T>
+std::array<T,DIM> ParticleBox<T>::VerletNextR(unsigned int ind)
+{
+  std::array<T,DIM> rt_plus_h{{0.0, 0.0, 0.0}};
+  
+  auto &pos = particles[ind].pos;
+  auto &vel = particles[ind].vel;
+  auto &acc = particles[ind].acc;
+
+  rt_plus_h += pos + h*vel + (T)0.5*h*h*acc;
+
+  return rt_plus_h;
+}
+
+template <typename T>
+std::array<T,DIM> ParticleBox<T>::VerletNextV(unsigned int ind, 
+					      const std::array<T,DIM> &nacc)
+{
+  std::array<T,DIM> vt_plus_h{{0.0, 0.0, 0.0}};
+
+  auto vel = particles[ind].vel;
+  auto acc = particles[ind].acc;
+
+  vt_plus_h += vel + (T)0.5*h*(acc + nacc);
+
+  return vt_plus_h;
+}
+
+template <typename T>
+void ParticleBox<T>::SetPos(const std::vector<std::array<T,DIM> > &pos)
+{
+  for (unsigned int n=0; n<N; n++)
+    particles[n].SetPos(pos[n]);
+}
+
+template <typename T>
+void ParticleBox<T>::SetVel(const std::vector<std::array<T,DIM> > &vel)
+{
+  for (unsigned int n=0; n<N; n++)
+    particles[n].SetVel(vel[n]);
+}
+
+#endif /* PARTICLEBOX_HPP */

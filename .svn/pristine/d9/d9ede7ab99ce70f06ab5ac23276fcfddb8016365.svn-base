@@ -1,0 +1,25 @@
+#define PRECISION double
+
+#include "ParticleBox.hpp"
+
+/* -1functionality Invoking make did not run the program. See http://stackoverflow.com/questions/15566405/run-executable-from-makefile */
+/* +functionality Compiles and generates the same results as the Python implementation */
+
+int main()
+{
+  unsigned int N = 64;
+  PRECISION L = (PRECISION) 4.2323167;
+  PRECISION T0 = (PRECISION) 0.728;
+  PRECISION M = (PRECISION) 48.0;
+
+  ParticleBox<PRECISION> PB(N,L,T0,M);
+  //PB.WriteData("solution0.dat");
+  //PB.Solve(20);
+  //PB.WriteData("solution20_ref.dat");
+  
+  //  ParticleBox<PRECISION> PBcp("solution0.dat");
+  //PBcp.Solve(10);
+  //PBcp.WriteData("solution10.dat");
+
+  return 0;
+}

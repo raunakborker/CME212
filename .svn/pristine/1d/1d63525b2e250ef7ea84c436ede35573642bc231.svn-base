@@ -1,0 +1,31 @@
+#ifndef solveroperators_hpp
+#define solveroperators_hpp
+
+#include <vector>
+
+template <typename T>
+friend std::vector<T> & operator* (CSRMatrix<T> &A, std::vector<T> &x)
+{
+  std::vector<T> y (x.size(),0.0);
+
+  // Check if matrix and vector are size compatible
+  if (A.ncols==(int)x.size())
+    {
+      for (unsigned int row=0; row<(unsigned int)nrows; row++)
+        {
+          for (unsigned int i=A.row_ptr[row]; i<(unsigned int)A.row_ptr[row+1]; i++)
+            {
+              unsigned int col = (unsigned int)A.col_ind[i];
+              y[row] += A.val[i]*x[col];
+            }
+        }
+      return y;
+    }
+  else
+    {
+      ThrowException("Matrix and vector of incompatible sizes");
+    }
+}
+
+
+#endif /* solveroperators_hpp */

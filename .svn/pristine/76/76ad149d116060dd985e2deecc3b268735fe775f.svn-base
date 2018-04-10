@@ -1,0 +1,46 @@
+#include <iostream>
+#include <new>
+
+#include "../../include/utilities.hpp"
+
+int main()
+{
+  int size = 4;
+  int ldim = size + 0;
+
+  // Initialize matrix of size 4096 X 4096
+  double *mat = new double [(size+ldim)*size];
+
+  InitMatrix(mat,size,ldim);
+  for (int i=0; i<size; i++) //can start from i=1
+    {
+      for (int j=0; j<size; j++)
+        {
+          int indij = GlobalIndex(i,j,ldim);
+          std::cout << "(" << i << "," << j << "): " << mat[indij] << std::endl;
+        }
+    } 
+  auto out = SimpleTranspose(mat,size,ldim);
+
+  if (out != 0)
+    {
+      return out;
+    }
+  else
+    {
+      for (int i=0; i<size; i++) //can start from i=1
+        {
+          for (int j=0; j<size; j++)
+            {
+              int indij = GlobalIndex(i,j,ldim);
+              std::cout << "(" << i << "," << j << "): " << mat[indij] << std::endl;
+            }
+        } 
+    }
+  
+
+  delete [] mat; 
+  mat = NULL;
+  
+  return 0;
+}

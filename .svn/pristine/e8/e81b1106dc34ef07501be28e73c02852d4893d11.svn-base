@@ -1,0 +1,10 @@
+#ifndef pivcext_h
+#define pivcext_h
+
+#ifdef SWIG
+%import "pivcext.i"
+#endif /* SWIG */
+
+double * XCorrC(double *a, double *b, int n1, int n2);
+
+#endif /* pivcext_h */

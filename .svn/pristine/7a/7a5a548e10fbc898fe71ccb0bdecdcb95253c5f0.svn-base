@@ -1,0 +1,75 @@
+#include <cmath>
+#include <iostream>
+#include <vector>
+
+#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/TestCase.h>
+#include <cppunit/TestCaller.h>
+#include <cppunit/extensions/HelperMacros.h>
+
+#include "../../include/auxfuncs.hpp"
+#include "../../include/ParticleBox.hpp"
+
+#define PRECISION double
+#define TOL 1.e-10
+
+class ParticleBoxTest: public CppUnit::TestCase
+{
+  /*private:
+  unsigned int N = 64;
+  PRECISION L = (PRECISION) 4.2323167;
+  PRECISION T0 = (PRECISION) 0.728;
+  PRECISION M = (PRECISION) 48.0;*/
+  
+  CPPUNIT_TEST_SUITE( ParticleBoxTest );
+  CPPUNIT_TEST( Test00to10 );
+  CPPUNIT_TEST( Test10to20 );
+  CPPUNIT_TEST_SUITE_END();
+
+public:
+  ParticleBoxTest() : CppUnit::TestCase("ParticleBox Test") {}
+
+  void Test00to10()
+  {
+    //ParticleBox<PRECISION> PB(N,L,T0,M);
+    //PB.WriteData("solution0.dat");
+    //PB.Solve(19);
+    //auto energy_ref = PB.ComputeEnergy();
+    std::vector<double> energy_ref {-323.527790079, 65.4308062926, -258.096983787};  
+    
+    ParticleBox<PRECISION> PBcp("../../data/solution0.dat");
+    PBcp.Solve(10);
+    auto energy = PBcp.ComputeEnergy();    
+    std::cout << "Test00to10 " << std::endl;
+    std::cout << energy << " :: " << energy_ref << std::endl;
+    CPPUNIT_ASSERT( fabs(energy[0]-energy_ref[0])/fabs(energy_ref[0]) < TOL && \
+                    fabs(energy[1]-energy_ref[1])/fabs(energy_ref[1]) < TOL && \
+                    fabs(energy[2]-energy_ref[2])/fabs(energy_ref[2]) < TOL );
+  }
+
+  void Test10to20()
+  {
+    //ParticleBox<PRECISION> PB(N,L,T0,M);
+    //PB.WriteData("solution0.dat");
+    //PB.Solve(19);
+    //auto energy_ref = PB.ComputeEnergy();
+    std::vector<double> energy_ref {-311.566604177, 53.472789131, -258.093815046};  
+    
+    ParticleBox<PRECISION> PBcp("../../data/solution10_ref.dat");
+    PBcp.Solve(10);
+    auto energy = PBcp.ComputeEnergy();    
+    std::cout << "Test10to20 " << std::endl;
+    std::cout << energy << " :: " << energy_ref << std::endl;
+    CPPUNIT_ASSERT( fabs(energy[0]-energy_ref[0])/fabs(energy_ref[0]) < TOL && \
+                    fabs(energy[1]-energy_ref[1])/fabs(energy_ref[1]) < TOL && \
+                    fabs(energy[2]-energy_ref[2])/fabs(energy_ref[2]) < TOL );
+  }
+};
+
+int main()
+{
+  CppUnit::TextUi::TestRunner runner;
+  runner.addTest(ParticleBoxTest::suite());
+  bool successful = runner.run();
+  return !successful;
+}

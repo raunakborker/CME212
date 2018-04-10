@@ -1,0 +1,91 @@
+#ifndef HELPERFUNCTIONS_HPP
+#define HELPERFUNCTIONS_HPP
+
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <ostream>
+#include <vector>
+
+#include "macros.hpp"
+
+template <typename T>
+T L2norm(const std::vector<T> &v)
+{
+  T norm = std::inner_product(v.begin(),v.end(),v.begin(),(T)0);
+
+  return std::sqrt(norm);
+}
+
+template <typename T>
+std::vector<T> operator-(const std::vector<T> &v1, const std::vector<T> &v2)
+{
+  if (v1.size() != v2.size())
+  {
+    ThrowException("Vectors of different lengths");
+  }
+
+  std::vector<T> v3;
+  v3.resize(v1.size());
+  std::transform(v1.begin(), v1.end(), v2.begin(), v3.begin(), std::minus<T>());
+
+  return v3;
+}
+
+template <typename T>
+std::vector<T>& operator+=(std::vector<T> &v1, const std::vector<T> &v2)
+{
+  if (v1.size() != v2.size())
+  {
+    ThrowException("Vectors of different lengths");
+  }
+
+  std::transform(v1.begin(), v1.end(), v2.begin(), v1.begin(), std::plus<T>());
+
+  return v1;
+}
+
+template <typename T>
+std::vector<T> operator*(T scalar, const std::vector<T> &v1)
+{
+  std::vector<T> v2;
+  v2.resize(v1.size());
+
+  for (unsigned int n = 0; n < v1.size(); n++)
+  {
+    v2[n] = scalar*v1[n];
+  }
+
+  return v2;
+}
+
+template <typename T>
+std::vector<T> operator+(const std::vector<T> &v1, const std::vector<T> &v2)
+{
+  if (v1.size() != v2.size())
+  {
+    ThrowException("Vectors of different lengths");
+  }
+
+  std::vector<T> v3;
+  v3.resize(v1.size());
+
+  std::transform(v1.begin(), v1.end(), v2.begin(), v3.begin(), std::plus<T>());
+
+  return v3;
+}
+
+template <typename T>
+std::ostream & operator<< (std::ostream &os, const std::vector<T> &v) 
+{
+  for (unsigned int i=0; i<v.size(); i++)
+    {
+      os << v[i];
+      if (i!=v.size()-1)
+        os << " ";
+    } 
+
+  return os;
+}
+
+#endif /* HELPERFUNCTIONS_HPP */

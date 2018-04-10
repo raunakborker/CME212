@@ -1,0 +1,10 @@
+main.cpp:5: -1functionality Invoking make did not run the program. See http://stackoverflow.com/questions/15566405/run-executable-from-makefile
+
+main.cpp:6: +functionality Compiles and generates the same results as the Python implementation
+
+
+functionality: 9/10
+
+total: 9/10
+
+grader: Brian Jo (brianjo@stanford.edu)

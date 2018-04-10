@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/swap.hpp
+
+/afs/ir/users/r/b/rborker/CME212/FinalProject/src/swap.cpp
+cstring
+-
+swap.hpp
+/afs/ir/users/r/b/rborker/CME212/FinalProject/src/swap.hpp
+

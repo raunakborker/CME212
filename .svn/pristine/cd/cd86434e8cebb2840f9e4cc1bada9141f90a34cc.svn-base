@@ -1,0 +1,92 @@
+#ifndef PARTICLE_HPP
+#define PARTICLE_HPP
+
+#include <vector>
+
+#define DIM 3
+
+/* Class that defines a particle in a MD simulation */
+template <typename T>
+class Particle
+{
+private:
+  std::vector<T> pos;
+  std::vector<T> vel;
+  std::vector<T> acc;
+  T mass;
+public:
+  Particle(const std::vector<T> &pos = std::vector<T> (DIM,0.0), 
+           const std::vector<T> &vel = std::vector<T> (DIM,0.0),
+           const std::vector<T> &acc = std::vector<T> (DIM,0.0),
+           T mass = 1.0);
+  void SetPos(const std::vector<T> &R);
+  void SetVel(const std::vector<T> &V);
+  void SetAcc(const std::vector<T> &A);
+  void SetMass(T M);
+  std::vector<T> GetPos(void);
+  std::vector<T> GetVel(void);
+  std::vector<T> GetAcc(void);
+  T GetMass(void);
+};
+
+template <typename T>
+Particle<T>::Particle(const std::vector<T> &pos, 
+                      const std::vector<T> &vel,
+                      const std::vector<T> &acc,
+                      T mass)
+{
+  this->pos = pos;
+  this->vel = vel;
+  this->acc = acc;
+  this->mass = mass;
+}
+
+template <typename T>
+void Particle<T>::SetPos(const std::vector<T> &R)
+{
+  this->pos = R;
+}
+
+template <typename T>
+void Particle<T>::SetVel(const std::vector<T> &V)
+{
+  this->vel = V;
+}
+
+template <typename T>
+void Particle<T>::SetAcc(const std::vector<T> &A)
+{
+  this->acc = A;
+}
+
+template <typename T>
+void Particle<T>::SetMass(T M)
+{
+  this->mass = M;
+}
+
+template <typename T>
+std::vector<T> Particle<T>::GetPos(void)
+{
+  return this->pos;
+}
+
+template <typename T>
+std::vector<T> Particle<T>::GetVel(void)
+{
+  return this->vel;
+}
+
+template <typename T>
+std::vector<T> Particle<T>::GetAcc(void)
+{
+  return this->acc;
+}
+
+template <typename T>
+T Particle<T>::GetMass(void)
+{
+  return this->mass;
+}
+
+#endif /* PARTICLE_HPP */

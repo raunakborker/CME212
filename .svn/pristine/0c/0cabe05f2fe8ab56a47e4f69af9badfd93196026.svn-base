@@ -1,0 +1,43 @@
+#ifndef SHAPE_HPP
+#define SHAPE_HPP
+
+#include <array>
+
+class Shape
+{
+protected:
+  unsigned int color;
+  double norm2(double x1, double x2, double x3);
+public:
+  std::array<double,3> centre;
+  double maxdim;
+  
+  unsigned int GetColor(void);
+  void SetColor(unsigned int color);
+  virtual bool PointInside(const std::array<double,3> &point) = 0;
+  virtual std::array<double,4> BoundingBox(void) = 0;
+};
+
+class Sphere: public Shape
+{
+private:
+  double x, y, z, r;
+public:
+  Sphere(double x, double y, double z, double r);
+  bool PointInside(const std::array<double,3> &point);
+  std::array<double,4> BoundingBox(void);
+};
+
+class RightCircularCone: public Shape
+{
+private:
+  double xa, ya, za, xb, yb, zb, r;
+  double height;
+public:
+  RightCircularCone(double r, double xb, double yb, double zb, \
+		    double xa, double ya, double za);
+  bool PointInside(const std::array<double,3> &point);
+  std::array<double,4> BoundingBox(void);
+};
+
+#endif /* SHAPE_HPP */

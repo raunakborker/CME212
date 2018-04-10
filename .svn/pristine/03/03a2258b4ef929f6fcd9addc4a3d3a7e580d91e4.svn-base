@@ -1,0 +1,98 @@
+#ifndef solverbicgstab_hpp
+#define solverbicgstab_hpp
+
+#include <algorithm>
+#include <cfloat>
+#include <limits>
+#include <numeric>
+#include <sstream>
+#include <vector>
+
+#include "macros.hpp"
+#include "solveroperators.hpp"
+#include "sparse.hpp"
+#include "timer.h"
+
+
+/* Template class for a BiConjugate Gradient STABilized (BiCGSTAB) solver */
+
+template <typename T>
+class BiCGSTABSolver
+{
+  private:
+    int niter = -1;                             // actual number of iterations that were run
+    T l2normr = std::numeric_limits<T>::max();  // l2 norm of the residual at end of iterations
+    double elapsedtime = -1.;                   // elapsed solver time
+
+  public:
+
+    /* Method to run solver.  On entry the vector x may contain an initial guess,
+       and on return will contain the solution.  Optional parameters can be specified
+       to control the maximum number of iterations (defaults to the size of the
+       linear system if nitermax == -1), whether to use the contents of x as the
+       initial guess for the solution, and the relative threshold for determining whether
+       the solution is converged. */
+
+    bool Solve(const CSRMatrix<T> &A,
+               const std::vector<T> &x,
+               std::vector<T> &b,
+               int nitermax = -1,
+               bool use_initial_guess = false,
+               double threshold = 1.e-4);
+
+    /* Returns the actual number of iterations performed */
+
+    int GetNumberIterations(void);
+
+    /* Returns the l2 norm of the residual */
+    
+    double Getl2NormResidual(void);
+
+    /* Get solver elapsed time */
+
+    double GetElapsedTime(void);
+};
+
+
+template <typename T>
+bool BiCGSTABSolver<T>::Solve(const CSRMatrix<T> &A,
+                              const std::vector<T> &b,
+                              std::vector<T> &x,
+                              int nitermax,
+                              bool use_initial_guess,
+                              double threshold)
+{
+  std::cerr << "ERROR: BiCGSTABSolver<T>::Solve() not implemented yet!" << std::endl;
+  exit(1);
+  // Confirm input matrix and rhs have compatible sizes
+  if (A.GetNumberCols() != (int)b.size())
+    {
+      ThrowException("Matrix and Vector of incompatible sizes");
+    }
+
+  return false;
+}
+
+
+template <typename T>
+int BiCGSTABSolver<T>::GetNumberIterations(void)
+{
+  return niter;
+}
+
+
+template <typename T>
+double BiCGSTABSolver<T>::Getl2NormResidual(void)
+{
+  return l2normr;
+}
+
+
+template <typename T>
+double BiCGSTABSolver<T>::GetElapsedTime(void)
+{
+  return elapsedtime;
+}
+
+
+#endif /* solverbicgstab_hpp */

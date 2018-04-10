@@ -1,0 +1,40 @@
+include/shapes.hpp:12: -10design Public data attributes are not acceptable.  Make them private or protected and use accessor/modifier functions (e.g., set/get)
+
+include/part.hpp:13: -1design A vector would have been a better choice here, especially since your key simply corresponds to a shape number
+
+include/part.hpp:16: -design No need to store a nshapes variable explicitly if you used a vector, e.g., shapes.size()
+
+src/geometry/shapes.cpp:54: -design Don't you think it would be more natural to store these variables as points?  E.g., std::array<double, 3> apex, std::array<double, 3> base_center
+
+src/geometry/shapes.cpp:69: -design A better alternative to using a hardcoded eps is to use std::numeric_limits<double>::epsilon
+
+src/geometry/shapes.cpp:98: -3functionality Bounding box for shape is not large enough.  Consider a cone that is not axis aligned with, say, w == height == 2*r.  The distance from cone axis midpt (x,y,z) to a point on the base circumference would be sqrt(2)*r > w/2.
+
+src/geometry/part.cpp:1: -1style Unneeded include file(s): iostream
+
+src/geometry/part.cpp:2: +style Includes nicely alphabetized.
+
+src/geometry/part.cpp:88: -1design Read documentation on std::numeric_limits<double>::min().  I think you want std::numeric_limits<double>::lowest() ?
+
+src/geometry/part.cpp:93: -style Declare these variables closer to where they are actually used
+
+src/geometry/part.cpp:116: +style Clever way to test alignment of unitnormal, but might be confusing for some people
+
+src/geometry/part.cpp:124: -style There is a nicer way to do this than evaluating each unitnormal case separately.  See solution.
+
+src/geometry/part.cpp:127: -style More clear to write i = {1, 2, 0}. Same goes for the other array initializations
+
+src/geometry/part.cpp:148: -style Write this as data.second *= (dx*dy*dz) ;
+
+src/geometry/part.cpp:164: -1style This variable name is not very descriptive.  i is a very generic variable name and it's not immediately obvious what it represents in the context of this GridIterator function
+
+src/geometry/part.cpp:170: -style A for-loop would be better here, e.g. for (; X[i[0]] < x0max + dx0/2; X[i[0]] += dx0) etc...
+
+
+functionality: 52/55
+style: 13/15
+design: 18/30
+
+total: 83/100
+
+grader: Brian Jo (brianjo@stanford.edu)

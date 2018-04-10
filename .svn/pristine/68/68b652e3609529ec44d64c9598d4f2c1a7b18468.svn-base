@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 2.0)
+project(moldyn)
+
+# Enable testing
+# enable_testing()
+
+add_subdirectory(src)
+# add_subdirectory(src/tests)
+
+# Copy data to build directory

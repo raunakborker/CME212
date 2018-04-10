@@ -1,0 +1,61 @@
+#ifndef solveroperators_hpp
+#define solveroperators_hpp
+
+#include <vector>
+
+#include "macros.hpp"
+
+template <typename T>
+std::vector<T> Add(const std::vector<T> &a, 
+                   const std::vector<T> &b)
+{
+  std::vector<T> sum;
+  
+  // Check if vectors are of the same size
+  if (a.size()==b.size())
+    {
+      for (unsigned int i=0; i<a.size(); i++)
+        sum.push_back(a[i]+b[i]);
+      
+      return sum;
+    }
+  else
+    {
+      ThrowException("Vectors of different lengths");
+    }
+}
+
+/* Product of a scalar and vector */
+std::vector<T> Prod(const T a, const std::vector<T> &b)
+{
+  std::vector<T> prod (b.size(),0.0);
+  
+  for (unsigned int i=0; i<b.size(); i++)
+    {
+      prod[i] = a*b[i];
+    }
+
+  return prod;
+}
+
+/* Dot product of 2 vectors */
+T Prod(const std::vector<T> &a, 
+       const std::vector<T> &b)
+{
+  T val = 0.0;
+  
+  // Check if vectors are of the same size
+  if (a.size()==b.size())
+    {
+      for (unsigned int i=0; i<a.size(); i++)
+        val += a[i]*b[i];
+      
+      return val;
+     }
+  else
+    {
+      ThrowException("Vectors of different lengths")
+    } 
+}
+
+#endif /* solveroperators_hpp */

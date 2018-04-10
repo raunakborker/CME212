@@ -1,0 +1,85 @@
+#ifndef IMAGE_HPP
+#define IMAGE_HPP
+
+#include <string>
+
+#include "tiffio.h"
+
+namespace ImageAnalysis
+{
+  template <typename T>
+  class Image
+  {
+  private:
+      unsigned int width, height;
+      T *rgba;
+
+  public:
+    Image(std::string filename)
+    {
+      const char *inputfile = filename.c_str();
+      
+      TIFF *tif = TIFFOpen(inputfile, "r");
+      if (!tif)
+	{
+	  std::cerr << "ERROR: Failed to open " << filename << " for input" << std::endl;
+	  //return 1;
+	}
+      
+      TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &this->width);
+      TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &this->height);
+
+      this->rgba = (T *) _TIFFmalloc(4*width*height*sizeof(T));
+      TIFFReadRGBAImage(tif, this->width, this->height, (unsigned int *)this->rgba, 0);
+      
+      TIFFClose(tif);
+      tif = NULL; 
+    }
+    
+    Image(T *data, unsigned int width, unsigned int height)
+    {
+      
+    }
+
+    void Save(std::string filename);
+
+    void Threshold(T threshold);
+
+    unsigned long int CountPixesGreaterThanOrEqual(T value = (T)0);
+
+    ~Image();
+  };
+
+  template <>
+  Image<float>::Image(std::string filename)
+    {
+      const char *inputfile = filename.c_str();
+      unsigned char *rgbachar;      
+
+      TIFF *tif = TIFFOpen(inputfile, "r");
+      if (!tif)
+	{
+	  std::cerr << "ERROR: Failed to open " << filename << " for input" << std::endl;
+	  //return 1;
+	}
+      
+      TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &this->width);
+      TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &this->height);
+
+      rgbachar = (unsigned char *) _TIFFmalloc(4*width*height*sizeof(unsigned char));
+      TIFFReadRGBAImage(tif, this->width, this->height, (unsigned int *)rgbachar, 0);
+
+      this->rgba = new float[width*height];
+      for(n = 0; n < width*height; n++)
+	  this->rgba[n] = (float)((float)rgbachar[n]/255.0f);
+
+      _TIFFfree(rgbachar);
+      rgbachar = NULL;
+      
+      TIFFClose(tif);
+      tif = NULL; 
+    }
+
+}
+
+#endif /* IMAGE_HPP */

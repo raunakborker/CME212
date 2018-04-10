@@ -1,0 +1,26 @@
+main.cpp:5: -0style Use either all tabs or all spaces for indentation, don't mix and match
+
+imageanalysis.hpp:4: -1style Unneeded include file(s), <limits>
+
+imageanalysis.hpp:37: -0style It would be better to initialize the pointer value with something at declaration time (e.g., NULL or nullptr)
+
+imageanalysis.hpp:42: -3design Put your method implementations outside the class declaration
+
+imageanalysis.hpp:65: -2design Although it's impressive you managed to avoid using a specialized template constructor, this loop is redundant in the case of an unsigned char
+
+imageanalysis.hpp:87: -1design Instead of a loop, use std::copy() to copy memory
+
+imageanalysis.hpp:103: -0design Again, this loop is unneeded in the case of an unsigned char. Better to use template specialization
+
+imageanalysis.hpp:121: -0style Can do this with a std algorithm for_each or transform
+
+imageio.cpp:89: -1style Remove commented out test / debug code
+
+
+functionality: 60/60
+style: 8/10
+design: 24/30
+
+total: 92/100
+
+grader: Brian Jo (brianjo@stanford.edu)

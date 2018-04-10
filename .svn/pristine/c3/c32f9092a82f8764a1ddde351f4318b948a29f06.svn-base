@@ -1,0 +1,183 @@
+#ifndef IMAGE_HPP
+#define IMAGE_HPP
+
+#include <algorithm>
+#include <limits>
+#include <string>
+
+#include "imageio.hpp"
+#include "tiffio.h"
+
+class IsGreaterThan
+{
+  float value;
+  public:
+  IsGreaterThan(float valuein) 
+  { 
+    value = valuein; 
+  }
+  // Special method so object can be called as a function
+  bool operator()(int dividend) 
+  { 
+    return (dividend>=value); 
+  }
+};
+
+namespace ImageAnalysis
+{
+  template <typename T>
+  class Image
+  {
+  private:
+    unsigned int width, height;
+    T *imagedata;
+    T minval, maxval;
+    float normalize;
+
+    void setMinMax(T &minval,T &maxval, float &normalize)
+    {
+      minval = 0;
+      maxval = 255;
+      normalize = 1.0f;
+    }    
+
+  public:
+    /* Constructor initializes image data by reading TIFF file */
+    /*Image(std::string filename)
+    {
+      ImageIO::Read8bitGrayscaleTIFF(filename,this->imagedata,this->width,this->height);
+    }*/
+    Image(std::string filename)
+    {
+      unsigned char *dataint = NULL;
+      ImageIO::Read8bitGrayscaleTIFF(filename,dataint,this->width,this->height);
+
+      this->imagedata = new T[this->width*this->height];
+      
+      setMinMax(this->minval,this->maxval,this->normalize);
+
+      /* Convert data from unsigned int 8bit to T */
+      for(unsigned int n = 0; n < this->width*this->height; n++)
+	{
+	  this->imagedata[n] = (T)(dataint[n]/this->normalize);
+	}
+      
+      delete[] dataint;
+      dataint = NULL;
+    }
+    
+    /* Overloaded Constructor initializes image data using provided data
+       in the memory region */       
+    Image(T *data, unsigned int width, unsigned int height)
+    {
+      this->width = width;
+      this->height = height;
+
+      /* Allocate memory for image data */
+      this->imagedata = new T[width*height];
+
+      /* Copy data from source to class */
+      for(unsigned int n = 0; n < width*height; n++)
+	  this->imagedata[n] = data[n];      
+    }
+    
+
+    /* Method to save current image data as TIFF */
+    void Save(std::string filename)
+    {
+      ImageIO::Write8bitGrayscaleTIFF(filename,this->imagedata,this->width,this->height);
+    }
+
+    /* Image processing operation: Threshold */
+    void Threshold(T threshold)
+    {
+      /* Loop over pixels to perform "Threshold" operation */
+      for(unsigned int n = 0; n < this->width*this->height; n++)
+	{
+	  T pix = this->imagedata[n];
+	  if (pix < threshold)
+	    this->imagedata[n] = minval;
+	  else
+	    this->imagedata[n] = maxval;
+	}
+    }
+
+    /* Image processing operation: Count number of pixels with 
+       value greater than a threshold */
+    unsigned long int CountPixelsGreaterThanOrEqual(T value = (T)0)
+    {
+      unsigned int n = this->width*this->height;
+
+      /* Use count_if function from algorithm to perform count */
+      unsigned long int count = std::count_if(this->imagedata,this->imagedata + n,IsGreaterThan((float)value));
+      
+      return count;
+    }
+
+    /* Destructor */
+    ~Image()
+    {
+      delete[] this->imagedata;
+      this->imagedata = NULL;
+    }
+  };
+  
+  /* Template specialization for float*/
+  template<>
+  Image<float>::setMinMax(float &minval,float &maxval, float &normalize)
+  {
+    minval = 0.0f;
+    maxval = 1.0f;
+    normalize = 255.0f;
+  }    
+
+  // template <>
+  // Image<float>::Image(std::string filename)
+  //   {
+  //     unsigned char *dataint = NULL;
+  //     ImageIO::Read8bitGrayscaleTIFF(filename,dataint,this->width,this->height);
+
+  //     this->imagedata = new float[this->width*this->height];
+
+  //     /* Convert data from unsigned int 8bit to float */
+  //     for(unsigned int n = 0; n < this->width*this->height; n++)
+  // 	{
+  // 	  this->imagedata[n] = (float)((float)dataint[n]/255.0f);
+  // 	}
+      
+  //     delete[] dataint;
+  //     dataint = NULL;
+  //   }
+
+  /* Method to save current image data as TIFF */
+  template <>
+  void Image<float>::Save(std::string filename)
+  {
+    unsigned char *dataint = NULL;
+    unsigned char lim_min = std::numeric_limits<unsigned char>::min();
+    unsigned char lim_max = std::numeric_limits<unsigned char>::max();
+    
+    dataint = new unsigned char[this->width*this->height];
+    
+    /* Convert data from float to unsigned int 8bit */
+    for(unsigned int n = 0; n < this->width*this->height; n++)
+      {
+	float pix = this->imagedata[n]*255.0f;
+	/* Assure that round-off errors have not caused pixel 
+	   values to go out of unsigned char limits */
+	if (pix < lim_min)
+	  pix = lim_min;
+	else if (pix > lim_max)
+	  pix = lim_max;
+
+	dataint[n] = (unsigned char)(pix);
+      }
+    
+    ImageIO::Write8bitGrayscaleTIFF(filename,dataint,this->width,this->height);
+
+    delete[] dataint;
+    dataint = NULL;
+  }  
+}
+
+#endif /* IMAGE_HPP */

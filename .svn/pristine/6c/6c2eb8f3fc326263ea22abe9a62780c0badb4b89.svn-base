@@ -1,0 +1,36 @@
+#include <iostream>
+#include <new>
+
+#include "config.h"
+
+#include "timer.h"
+#include "utilities.hpp"
+
+int main()
+{
+  int size = 4096;
+  int ldim = size + 0;
+
+  // Initialize matrix of size 4096 X 4096
+  double *mat = new double [ldim*size];
+  InitMatrix(mat, size, ldim);
+
+  std::cout << "Running SimpleTranspose():" << std::endl;
+  double t_start = timer();
+  int out = SimpleTranspose(mat, size, ldim);
+  double t_end = timer();
+  
+  delete [] mat; 
+  mat = NULL;
+
+  if (out != 0)
+    {
+      std::cerr << "Matrix transpose not succesful!" << std::endl;
+      return out;
+    }
+  
+  double bandwidth = 2*size*size*(double)sizeof(double)/1.e9/(t_end-t_start);
+  std::cout << "Effective bandwidth = " << bandwidth << " GB/sec" << std::endl;
+
+  return 0;
+}

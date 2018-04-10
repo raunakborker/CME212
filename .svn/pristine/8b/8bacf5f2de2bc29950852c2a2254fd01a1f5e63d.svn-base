@@ -1,0 +1,31 @@
+#ifndef PART_HPP
+#define PART_HPP
+
+#include <array>
+#include <map>
+#include <memory>
+
+#include "shapes.hpp"
+
+class Part
+{
+private:
+  std::map<int,std::shared_ptr<Shape>> shapes;
+  int nshapes = 0;
+  unsigned long ncolor = 0;
+  
+  void GridIterator(std::map<unsigned int,double> &vol,
+		    std::array<double,3> &X,
+		    double x0max, double x1max,
+		    double dx0, double dx1,
+		    const std::array<unsigned long,2> &i);
+public:
+  Part(void);
+  void ReadPartFile(std::string partfile);
+  std::map<unsigned int,double> SliceVolume(const std::array<double,3> &unitnormal,
+  					    const std::array<double,3> &point,
+  					    const std::array<double,3> &discretization);
+  int GetnShapes(void);
+  unsigned long GetnColor(void);
+};
+#endif /* PART_HPP */

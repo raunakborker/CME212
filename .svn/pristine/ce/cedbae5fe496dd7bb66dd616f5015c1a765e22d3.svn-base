@@ -1,0 +1,98 @@
+#ifndef PARTICLE_HPP
+#define PARTICLE_HPP
+
+#include <iostream>
+
+#include "array3.hpp"
+
+#define DIM 3
+
+template<typename T>
+class ParticleBox;
+
+/* Class that defines a particle in a MD simulation */
+template <typename T>
+class Particle
+{
+private:
+  Array3<T> pos;
+  Array3<T> vel;
+  Array3<T> acc;
+  T mass;
+public:
+  template<typename U> friend class ParticleBox;
+  Particle(const Array3<T> &pos = Array3<T> (),
+           const Array3<T> &vel = Array3<T> (),
+           const Array3<T> &acc = Array3<T> (),
+           T mass = 1.0);
+  void SetPos(const Array3<T> &R);
+  void SetVel(const Array3<T> &V);
+  void SetAcc(const Array3<T> &A);
+  void SetMass(T M);
+  Array3<T> GetPos(void);
+  Array3<T> GetVel(void);
+  Array3<T> GetAcc(void);
+  T GetMass(void);
+};
+
+template <typename T>
+Particle<T>::Particle(const Array3<T> &pos, 
+                      const Array3<T> &vel,
+                      const Array3<T> &acc,
+                      T mass)
+{
+  this->pos = pos;
+  this->vel = vel;
+  this->acc = acc;
+  this->mass = mass;
+}
+
+template <typename T>
+void Particle<T>::SetPos(const Array3<T> &R)
+{
+  this->pos = R;
+}
+
+template <typename T>
+void Particle<T>::SetVel(const Array3<T> &V)
+{
+    this->vel = V;
+}
+
+template <typename T>
+void Particle<T>::SetAcc(const Array3<T> &A)
+{
+  this->acc = A;
+}
+
+template <typename T>
+void Particle<T>::SetMass(T M)
+{
+  this->mass = M;
+}
+
+template <typename T>
+Array3<T> Particle<T>::GetPos(void)
+{
+  return this->pos;
+}
+
+template <typename T>
+Array3<T> Particle<T>::GetVel(void)
+{
+  return this->vel;
+}
+
+template <typename T>
+Array3<T> Particle<T>::GetAcc(void)
+{
+  return this->acc;
+}
+
+template <typename T>
+T Particle<T>::GetMass(void)
+{
+  return this->mass;
+}
+
+#endif /* PARTICLE_HPP */

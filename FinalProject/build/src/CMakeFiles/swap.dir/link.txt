@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC -O3 -DNDEBUG   -shared -Wl,-soname,libswap.so -o libswap.so CMakeFiles/swap.dir/swap.o 

@@ -1,0 +1,19 @@
+# Find SWIG
+find_package(SWIG REQUIRED)
+include(${SWIG_USE_FILE})
+
+# Find Python
+find_package(PythonLibs 2.7 REQUIRED)
+include_directories(${PYTHON_INCLUDE_PATH})
+
+# Include Directories
+include_directories(${MolDyn_SOURCE_DIR}/include)
+
+# set(CMAKE_SWIG_FLAGS "-std=c++11")
+
+# Enable C++ support
+set_source_files_properties(moldyn.i PROPERTIES CPLUSPLUS ON COMPILE_FLAGS "-std=c++11")
+
+swig_add_module(MolDyn python moldyn.i swap.cpp)
+
+swig_link_libraries(MolDyn ${PYTHON_LIBRARIES})

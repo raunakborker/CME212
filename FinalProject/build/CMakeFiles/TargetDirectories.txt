@@ -1,0 +1,3 @@
+/afs/ir/users/r/b/rborker/CME212/FinalProject/build/src/CMakeFiles/_moldyn.dir
+/afs/ir/users/r/b/rborker/CME212/FinalProject/build/src/CMakeFiles/swap.dir
+/afs/ir/users/r/b/rborker/CME212/FinalProject/build/tests/CMakeFiles/testRunner.dir

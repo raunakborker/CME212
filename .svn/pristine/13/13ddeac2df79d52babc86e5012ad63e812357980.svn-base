@@ -1,0 +1,16 @@
+#define PRECISION double
+
+#include "ParticleBox.hpp"
+
+int main()
+{
+  unsigned int N = 64;
+  PRECISION L = (PRECISION) 4.2323167;
+  PRECISION T0 = (PRECISION) 0.728;
+  PRECISION M = (PRECISION) 48.0;
+
+  ParticleBox<PRECISION> PB(N,L,T0,M);
+  PB.Solve(25);
+  
+  return 0;
+}

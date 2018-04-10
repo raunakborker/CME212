@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC -O3 -DNDEBUG   -shared -Wl,-soname,_pivcext.so -o _pivcext.so CMakeFiles/_pivcext.dir/pivcextPYTHON_wrap.c.o CMakeFiles/_pivcext.dir/pivcext.c.o -lpython2.7 

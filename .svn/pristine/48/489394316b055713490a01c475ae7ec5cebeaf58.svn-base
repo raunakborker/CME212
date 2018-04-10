@@ -1,0 +1,221 @@
+/* -1style Unneeded include file(s): iostream */
+/* +style Includes nicely alphabetized. */
+#include <array>
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_set>
+
+#include "part.hpp"
+
+
+/* Method to read in a part file */
+void Part::ReadPartFile(std::string partfile)
+{
+  std::ifstream f;
+  f.open(partfile);
+  
+  if (f.is_open())
+    {
+      std::string shape;
+      unsigned int color;
+      std::unordered_set<unsigned int> colors;
+
+      while (f >> shape >> color)
+        {
+          colors.insert(color);
+	  
+          /* Determine the shape and initialize an instance of it */
+          if (shape == "sphere")
+            {
+              double x, y, z, r;
+              f >> x >> y >> z >> r;
+              this->shapes[nshapes] = std::make_shared<Sphere>(x,y,z,r);	      
+
+              nshapes++;
+	    }
+          else if (shape == "rccone")
+            {
+              double r, xb, yb, zb, xa, ya, za;
+              f >> r >> xb >> yb >> zb >> xa >> ya >> za;
+              this->shapes[nshapes] = std::make_shared<RightCircularCone>(r,xb,yb,zb,xa,ya,za);
+
+              nshapes++;
+            }
+          else 
+            {
+              std::stringstream s;
+              s << __FILE__ << ", function " << __func__ << ", line " <<
+                __LINE__ << ",  Invalid part, " << shape << " is not a supported shape!" << std::endl;
+              throw std::runtime_error(s.str());
+            }
+          /* set the color of read shape */
+          this->shapes[nshapes-1]->SetColor(color);
+        }
+      ncolor = colors.size();
+    }
+  f.close();
+}
+
+
+/* Method to compute the volume/area of the part cut by a plane */
+std::map<unsigned int,double> Part::SliceVolume(const std::array<double,3> &unitnormal,
+                                                const std::array<double,3> &point,
+                                                const std::array<double,3> &discretization)
+{
+  std::map<unsigned int,double> volume;
+  
+  bool normalx = fabs(unitnormal[0]) > 0.0;
+  bool normaly = fabs(unitnormal[1]) > 0.0;
+  bool normalz = fabs(unitnormal[2]) > 0.0;
+    
+  double dx, dy, dz;
+  dx = discretization[0]; dy = discretization[1]; dz = discretization[2];
+
+  double x, y, z; 
+  x = point[0]; y = point[1]; z = point[2];
+
+  double xmin = std::numeric_limits<double>::max();
+  double ymin = xmin;
+  double zmin = xmin;
+  
+  /* -1design Read documentation on std::numeric_limits<double>::min().  I think you want std::numeric_limits<double>::lowest() ? */
+  double xmax = std::numeric_limits<double>::min();
+  double ymax = xmax;
+  double zmax = xmax;
+
+  /* -style Declare these variables closer to where they are actually used */
+  std::array<unsigned long,2> i{{0,0}};
+  std::array<double,3> X{{0.,0.,0.}};
+
+  /* Determine the bounds for the slicing plane*/
+  for (auto &o : this->shapes)
+    {
+      auto box = o.second->BoundingBox();
+
+      xmax = fmax(xmax, box[0] + box[3]/2);
+      ymax = fmax(ymax, box[1] + box[3]/2);
+      zmax = fmax(zmax, box[2] + box[3]/2);
+
+      xmin = fmin(xmin, box[0] - box[3]/2);
+      ymin = fmin(ymin, box[1] - box[3]/2);
+      zmin = fmin(zmin, box[2] - box[3]/2);
+
+      volume[o.second->GetColor()] = 0;
+    }
+
+  /* Check if the normal is along either x, y or z axis. 
+     Based on the normal call the volume calculator with 
+     appropriate arguments */
+  /* +style Clever way to test alignment of unitnormal, but might be confusing for some people */
+  if ((int)(normalx + normaly + normalz) != 1)
+    {
+      std::stringstream s;
+      s << __FILE__ << ", function " << __func__ << ", line " <<
+        __LINE__ << ", Normal not along x, y or z direction!" << std::endl;
+      throw std::runtime_error(s.str());
+    }
+  /* -style There is a nicer way to do this than evaluating each unitnormal case separately.  See solution. */
+  else if (normalx)
+    {
+      /* -style More clear to write i = {1, 2, 0}. Same goes for the other array initializations */
+      i[0] = 1; i[1] = 2; i[2] = 0;
+      X[0] = x; X[1] = ymin; X[2] = zmin;
+      Part::GridIterator(volume,X,ymax,zmax,dy,dz,i);
+    }
+  else if (normaly)
+    {
+      i[0] = 0; i[1] = 2; i[2] = 1;
+      X[0] = xmin; X[1] = y; X[2] = zmin;
+      Part::GridIterator(volume,X,xmax,zmax,dx,dz,i);
+    }
+  else
+    {
+      i[0] = 0; i[1] = 1; i[2] = 2;
+      X[0] = xmin; X[1] = ymin; X[2] = z;
+      Part::GridIterator(volume,X,xmax,ymax,dx,dy,i);
+    }
+
+  /* Once GridIterator computes volumes in terms of number
+     of subvolumes, multiply it with cell volume */
+  for(auto &data : volume) 
+    /* -style Write this as data.second *= (dx*dy*dz) */;
+    data.second = data.second*(dx*dy*dz);
+
+  return volume;
+}
+
+
+/* Method to iterate over the grid on the slicing plane to 
+   compute the volume in terms of number of subvolumes inside
+   the part */
+void Part::GridIterator(std::map<unsigned int,double> &volume,
+                        std::array<double,3> &X,
+                        double x0max, double x1max,
+                        double dx0, double dx1,
+                        const std::array<unsigned long,2> &i)
+{
+  /* -1style This variable name is not very descriptive.  i is a very generic variable name and it's not immediately obvious what it represents in the context of this GridIterator function */
+
+  unsigned int color1, color2;
+
+  double x1min = X[i[1]];
+
+  /* -style A for-loop would be better here, e.g. for (; X[i[0]] < x0max + dx0/2; X[i[0]] += dx0) etc... */
+  /* loop over 1st dimension */
+  while (X[i[0]]<x0max+dx0/2)
+    {
+      /* loop over 2nd dimnesion */
+      while (X[i[1]]<x1max+dx1/2)
+        {
+          // Flag to tell if this cell is yet inside any shape or not
+          bool insideFlag = false;
+          
+          for (auto &o : this->shapes)
+            {
+              if (o.second->PointInside(X))
+                {
+                  // If cell already inside some shape use else
+                  if (!insideFlag)
+                    {
+                      color1 = o.second->GetColor();
+                      volume[color1]++; 
+                      insideFlag = true;
+                    }
+                  else
+                    {
+                      color2 = o.second->GetColor();
+                      if (color2 < color1)
+                        {
+                          volume[color1]--;
+                          volume[color2]++;
+                        }
+                    }
+                }
+            }
+          X[i[1]] = X[i[1]] + dx1;
+        }
+      X[i[0]] = X[i[0]] + dx0;
+      X[i[1]] = x1min;
+    }	     
+}
+
+
+/* Method to give number of shapes */
+int Part::GetnShapes(void)
+{
+  return this->nshapes;
+}
+
+
+/* Method to give number of colors */
+unsigned long Part::GetnColor(void)
+{
+  return this->ncolor;
+}

@@ -1,0 +1,8 @@
+#ifndef UTILITIES_HPP
+#define UTILITIES_HPP
+
+int SimpleTranspose(double *a, int size, int ldim);
+int GlobalIndex(int rowid, int colid, int ldim);
+void InitMatrix(double *a, int size, int ldim);
+
+#endif /* UTILITIES_HPP */

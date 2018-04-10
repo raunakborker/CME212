@@ -1,0 +1,222 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "pivcext.h"
+
+double * XCorrC(double *a, double *b, int n1, int n2)
+{
+  int i, j, ka, la, kb, lb, kai, kaj, lai, laj;
+  //int An1 = 3*n1-2;
+  //int An2 = 3*n2-2;
+  int Rn1 = 2*n1-1;
+  int Rn2 = 2*n2-1;
+  double acc00;//, acc01, acc10, acc11;
+
+  double *R = (double *)malloc((2*n1-1)*(2*n2-1)*sizeof(double));
+  
+  /*double *A = (double *)malloc(An1*An2*sizeof(double));
+
+  for (i=0; i<An1; i++)
+    {
+      for (j=0; j<An2; j++)
+	{
+          A[i*An2 + j] = (double)0.0;
+	}
+    }
+
+  for (i=n1-1; i<2*n1-1; i++)
+    {
+      for (j=n2-1; j<2*n2-1; j++)
+	{
+	  A[i*An2 + j] = a[(i-(n1-1))*n2 + (j-(n2-1))];
+	}
+	}*/
+
+  if (R == NULL)
+    {
+      return R;
+    }
+  
+  for (i=-(n1-1); i<=0; i++)
+    {
+      for (j=-(n2-1); j<=0; j++)
+	{
+	  acc00 = 0.0;
+	  //	  if (i<=0)
+	  //  {
+	      kai = 0;
+	      kaj = n1-1 + i;
+	      /*	    }
+	  else
+	    {
+	      kai = i - 0;
+	      kaj = n1-1;
+	      }*/
+	      //	  if (j<=0)
+	      // {
+	      lai = 0;
+	      laj = n2-1 + j;
+	      /*	    }
+	  else
+	    {
+	      lai = j - 0;
+	      laj = n2-1;
+	      }*/
+
+	  for (ka=kai; ka<=kaj; ka++)
+	    {
+	      for (la=lai; la<=laj; la++)
+		{
+		  kb = ka - i;
+		  lb = la - j;
+		  acc00 = acc00 + (a[ka*n2 + la]*b[kb*n2 + lb]);
+		}
+	    }
+	  R[(i + (n1-1))*Rn2 + (j + (n2-1))] = acc00;
+	}
+    }
+
+  for (i=-(n1-1); i<=0; i++)
+    {
+      for (j=1; j<n2; j++)
+	{
+	  acc00 = 0.0;
+	  //	  if (i<=0)
+	  //  {
+	      kai = 0;
+	      kaj = n1-1 + i;
+	      //  }
+	      //else
+	      /* {
+	      kai = i - 0;
+	      kaj = n1-1;
+	      }*/
+	      /*	  if (j<=0)
+	    {
+	      lai = 0;
+	      laj = n2-1 + j;
+	    }
+	  else
+	  {*/
+	      lai = j - 0;
+	      laj = n2-1;
+	      //}
+
+	  for (ka=kai; ka<=kaj; ka++)
+	    {
+	      for (la=lai; la<=laj; la++)
+		{
+		  kb = ka - i;
+		  lb = la - j;
+		  acc00 = acc00 + (a[ka*n2 + la]*b[kb*n2 + lb]);
+		}
+	    }
+	  R[(i + (n1-1))*Rn2 + (j + (n2-1))] = acc00;
+	}
+    }
+
+  for (i=1; i<n1; i++)
+    {
+      for (j=-(n2-1); j<=0; j++)
+	{
+	  kai = i - 0;
+	  kaj = n1-1;
+	  
+	  lai = 0;
+	  laj = n2-1 + j;
+	  acc00 = 0.0;
+	  for (ka=kai; ka<=kaj; ka++)
+	    {
+	      for (la=lai; la<=laj; la++)
+		{
+		  kb = ka - i;
+		  lb = la - j;
+		  acc00 = acc00 + (a[ka*n2 + la]*b[kb*n2 + lb]);
+		}
+	    }
+	  R[(i + (n1-1))*Rn2 + (j + (n2-1))] = acc00;
+	}
+    }
+
+
+  for (i=1; i<n1; i++)
+    {
+      for (j=1; j<n2; j++)
+	{
+	  acc00 = 0.0;
+
+	  kai = i - 0;
+	  kaj = n1-1;
+	  
+	  lai = j - 0;
+	  laj = n2-1;
+	  
+	  for (ka=kai; ka<=kaj; ka++)
+	    {
+	      for (la=lai; la<=laj; la++)
+		{
+		  kb = ka - i;
+		  lb = la - j;
+		  acc00 = acc00 + (a[ka*n2 + la]*b[kb*n2 + lb]);
+		}
+	    }
+	  R[(i + (n1-1))*Rn2 + (j + (n2-1))] = acc00;
+	}
+    }
+  /*  for (i=0; i<Rn1-1; i=i+2)
+    {
+      for (j=0; j<Rn2-1; j=j+2)
+	{	  
+	  acc00 = 0.0; acc10 = 0.0;
+	  acc01 = 0.0; acc11 = 0.0;
+	  for (k=0; k<n1; k++)
+	    {
+	      for (l=0; l<n2; l++)
+		{
+		  acc00 = acc00 + (b[k*n2 + l]*A[(k+i)*An2 + (j+l)]);
+		  acc01 = acc01 + (b[k*n2 + l]*A[(k+i)*An2 + (j+1+l)]);
+		  acc10 = acc10 + (b[k*n2 + l]*A[(k+i+1)*An2 + (j+l)]);
+		  acc11 = acc11 + (b[k*n2 + l]*A[(k+i+1)*An2 + (j+l+1)]);
+		}
+	    }
+	  R[i*Rn2 + j] = acc00;
+	  R[i*Rn2 + j + 1] = acc01;
+	  R[(i+1)*Rn2 + j] = acc10;
+	  R[(i+1)*Rn2 + j + 1] = acc11;
+	}
+    }
+
+  for (i=0; i<Rn1; i++)
+    {
+      j=Rn2-1;
+      acc00 = 0.0;
+      
+      for (k=0; k<n1; k++)
+	{
+	  for (l=0; l<n2; l++)
+	    {
+	      acc00 = acc00 + (double)(b[k*n2 + l]*A[(k+i)*An2 + (j+l)]);
+	    }
+	}
+      R[i*Rn2 + j] = acc00;
+    }
+
+  for (j=0; j<Rn2; j++)
+    {
+      i=Rn1-1;
+      acc00 = 0.0;
+      
+      for (k=0; k<n1; k++)
+        {
+          for (l=0; l<n2; l++)
+            {
+              acc00 = acc00 + (double)(b[k*n2 + l]*A[(k+i)*An2 + (j+l)]);
+            }
+        }
+      R[i*Rn2 + j] = acc00;
+    }*/
+  
+  //free(A); A = NULL;
+  
+  return R;
+}

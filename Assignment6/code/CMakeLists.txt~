@@ -1,0 +1,10 @@
+find_package(SWIG_REQUIRED)
+include(${SWIG_USE_FILE})
+
+#Find Python
+find_package(PythonLibs 2.7 REQUIRED)
+include_directories(${PYTHON_INCLUDE_PATH})
+
+swig_add_module(pivcext python pivcext.i pivcext.c)
+
+swig_link_libraries(pivcext ${PYTHON_LIBRARIES})
