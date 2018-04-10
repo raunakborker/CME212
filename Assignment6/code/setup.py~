@@ -1,5 +1,0 @@
-from distutils.core import setup, Extension
-import numpy
-
-sources = ['pivcext.i']
-include_dirs = [numpy.get_include()]

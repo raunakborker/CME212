@@ -1,6 +1,0 @@
-#ifndef pivcext_h
-#define pivcext_h
-
-double XCorrC(double *a, int n1, int n2);
-
-#endif /* pivcext_h */
